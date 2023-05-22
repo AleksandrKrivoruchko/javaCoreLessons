@@ -1,0 +1,10 @@
+FROM bellsoft/liberica-openjdk-alpine:11.0.16.1-1
+WORKDIR /app
+COPY ./src ./src
+
+RUN mkdir ./out
+
+RUN javac -sourcepath ./src -d ./out src/ru/avk/main_package/MainApp.java
+
+CMD java -classpath ./out ru.avk.main_package.MainApp
+
