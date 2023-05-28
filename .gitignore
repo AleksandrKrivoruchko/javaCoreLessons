@@ -2,6 +2,7 @@
 *.class
 */target/
 */.idea/
+*/.gitignore
 
 # Log file
 *.log
