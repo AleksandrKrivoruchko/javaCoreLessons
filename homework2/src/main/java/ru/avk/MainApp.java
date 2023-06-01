@@ -99,137 +99,7 @@ public class MainApp {
                 && movePlayer[1] >= 0 && movePlayer[1] < fieldSizeY;
     }
 
-    private static boolean isCellValid(int x, int y) {
-        return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
-    }
-
-    private static int[] getCountSellH() {
-        int countE = 0;
-        int countH = 0;
-        int coordinate = 0;
-        while (coordinate < fieldSizeX) {
-            if (isCellEmpty(coordinate, movePlayer[1])) {
-                countE++;
-            }
-            if (field[coordinate][movePlayer[1]] == DOT_HUMAN) {
-                countH++;
-            }
-            if (field[coordinate][movePlayer[1]] == DOT_AI) {
-                if(countE + countH < WIN_COUNT) {
-                    countE = 0;
-                    countH = 0;
-                }
-            }
-            coordinate++;
-        }
-        return new int[] {countH, countE};
-    }
-
-    private static int[] getCountSellV() {
-        int countE = 0;
-        int countH = 0;
-        int coordinate = 0;
-        while (coordinate < fieldSizeX) {
-            if (isCellEmpty(movePlayer[0], coordinate)) {
-                countE++;
-            }
-            if (field[movePlayer[0]][coordinate] == DOT_HUMAN) {
-                countH++;
-            }
-            if (field[movePlayer[0]][coordinate] == DOT_AI) {
-                if (countE + countH < WIN_COUNT) {
-                    countE = 0;
-                    countH = 0;
-                }
-            }
-            coordinate++;
-        }
-        return new int[] {countH, countE};
-    }
-
     private static void aiTurn() {
-        int winCount = 2;
-        int[] tempMove = new int[2];
-        tempMove[0] = movePlayer[0];
-        tempMove[1] = movePlayer[1];
-        int x;
-        int[] count = getCountSellH();
-        if (count[0] + count[1] >= WIN_COUNT) {
-            if(count[0] >= winCount) {
-                x = movePlayer[0] + 1;
-                while (x < fieldSizeX) {
-                    if (isCellEmpty(x, movePlayer[1])) {
-                        field[x][movePlayer[1]] = DOT_AI;
-                        return;
-                    }
-                    x++;
-                }
-                x = movePlayer[0] - 1;
-                while (x >=0) {
-                    if (isCellEmpty(x, movePlayer[1])) {
-                        field[x][movePlayer[1]] = DOT_AI;
-                        return;
-                    }
-                    x--;
-                }
-            }
-        }
-
-        int y;
-        count = getCountSellV();
-        if (count[0] + count[1] >= WIN_COUNT) {
-            if(count[0] >= winCount) {
-                y = movePlayer[1] + 1;
-                while (y < fieldSizeY) {
-                    if (isCellEmpty(movePlayer[0], y)) {
-                        field[movePlayer[0]][y] = DOT_AI;
-                        return;
-                    }
-                    y++;
-                }
-                y = movePlayer[1] - 1;
-                while (y >= 0) {
-                    if (isCellEmpty(movePlayer[0], y)) {
-                        field[movePlayer[0]][y] = DOT_AI;
-                        return;
-                    }
-                    y--;
-                }
-            }
-        }
-
-
-        if (checkLeftDiagonal(DOT_HUMAN)) {
-            movePlayer[0] = tempMove[0] + 1;
-            movePlayer[1] = tempMove[1] + 1;
-            if (isCellValid() && isCellEmpty()) {
-                    field[movePlayer[0]][movePlayer[1]] = DOT_AI;
-                    return;
-            }
-            movePlayer[0] = tempMove[0] - 1;
-            movePlayer[1] = tempMove[1] - 1;
-            if (isCellValid() && isCellEmpty()) {
-                        field[movePlayer[0]][movePlayer[1]] = DOT_AI;
-                        return;
-            }
-            movePlayer[0] = tempMove[0];
-            movePlayer[1] = tempMove[1];
-        }
-
-        if (checkRightDiagonal(DOT_HUMAN)) {
-            movePlayer[0] = tempMove[0] - 1;
-            movePlayer[1] = tempMove[1] + 1;
-            if (isCellValid() && isCellEmpty()) {
-                    field[movePlayer[0]][movePlayer[1]] = DOT_AI;
-                    return;
-            }
-            movePlayer[0] = tempMove[0] + 1;
-            movePlayer[1] = tempMove[1] - 1;
-            if (isCellValid() && isCellEmpty()) {
-                        field[movePlayer[0]][movePlayer[1]] = DOT_AI;
-                        return;
-            }
-        }
         do {
             movePlayer[0] = random.nextInt(fieldSizeX);
             movePlayer[1] = random.nextInt(fieldSizeY);
@@ -339,7 +209,7 @@ public class MainApp {
         int count = 1;
         count += countSellRightHorizontal(c, movePlayer[0] + 1, movePlayer[1])
                 + countSellLeftHorizontal(c, movePlayer[0] - 1, movePlayer[1]);
-        System.out.println("countHorizontal: " + count);
+//        System.out.println("countHorizontal: " + count);
         return count >= WIN_COUNT;
     }
 
@@ -347,7 +217,7 @@ public class MainApp {
         int count = 1;
         count += countSellBottomVertical(c, movePlayer[0], movePlayer[1] + 1)
                 + countSellTopVertical(c, movePlayer[0], movePlayer[1] - 1);
-        System.out.println("countVertical: " + count);
+//        System.out.println("countVertical: " + count);
         return count >= WIN_COUNT;
     }
 
