@@ -14,10 +14,6 @@ public class MainApp {
     private static int fieldSizeX;
     private static int fieldSizeY;
 
-    // Ход игрока movePlayer[0] = x, movePlayer[1] = y
-    private static int[] movePlayer = new int[2];
-
-
     public static void main(String[] args) {
         do {
             initialize();
@@ -25,12 +21,12 @@ public class MainApp {
             while (true) {
                 humanTurn();
                 printField();
-                if (gameCheck(DOT_HUMAN, "Вы победили!")) {
+                if (gameCheck(DOT_HUMAN, WIN_COUNT,"Вы победили!")) {
                     break;
                 }
                 aiTurn();
                 printField();
-                if (gameCheck(DOT_AI, "Компьютер победил!")) {
+                if (gameCheck(DOT_AI, WIN_COUNT,"Компьютер победил!")) {
                     break;
                 }
             }
@@ -78,163 +74,112 @@ public class MainApp {
      * исходя из игрового поля 5x5
      */
     private static void humanTurn() {
+        int x;
+        int y;
         do {
             System.out.print("Введите координаты X и Y (от 1 до 5) через пробел >>> ");
-            movePlayer[0] = SCANNER.nextInt() - 1;
-            movePlayer[1] = SCANNER.nextInt() - 1;
-        } while (!isCellValid() || !isCellEmpty());
-        field[movePlayer[0]][movePlayer[1]] = DOT_HUMAN;
+            x = SCANNER.nextInt() - 1;
+            y = SCANNER.nextInt() - 1;
+        } while (!isCellValid(x, y) || !isCellEmpty(x, y));
+        field[x][y] = DOT_HUMAN;
     }
 
-    private static boolean isCellEmpty() {
-        return field[movePlayer[0]][movePlayer[1]] == DOT_EMPTY;
-    }
-
+    /**
+     * Проверка, является ли ячейка игрового поля пустой
+     * @param x координата ячейки
+     * @param y координата ячейки
+     * @return результат проверки
+     */
     private static boolean isCellEmpty(int x, int y) {
         return field[x][y] == DOT_EMPTY;
     }
 
-    private static boolean isCellValid() {
-        return movePlayer[0] >= 0 && movePlayer[0] < fieldSizeX
-                && movePlayer[1] >= 0 && movePlayer[1] < fieldSizeY;
+    /**
+     * Проверка валидности ячейки
+     * @param x координата ячейки
+     * @param y координата ячейки
+     * @return результат проверки
+     */
+    private static boolean isCellValid(int x, int y) {
+        return x >= 0 && x < fieldSizeX
+                && y >= 0 && y < fieldSizeY;
     }
 
+    /**
+     * Ход компьютера
+     */
     private static void aiTurn() {
+        // Побеждает ли компьютер в текущем ходе (при выигрышной комбинации WIN_COUNT) ?
+        for (int y = 0; y < fieldSizeY; y++) {
+            for (int x = 0; x < fieldSizeX; x++) {
+                if (field[x][y] == DOT_EMPTY) {
+                    field[x][y] = DOT_AI;
+                    if (checkWin(DOT_AI, WIN_COUNT)) {
+                        return;
+                    } else {
+                        field[x][y] = DOT_EMPTY;
+                    }
+                }
+            }
+        }
+
+        // Побеждает ли игрок на текущий момент при выигрышной комбинации
+        // WIN_COUNT - 1 ?
+        boolean f = checkWin(DOT_HUMAN, WIN_COUNT - 1);
+        // Теперь, снова пойдем по всем свободным ячейкам игрового поля,
+        // если игрок уже побеждает при выигрышной комбинации WIN_COUNT - 1,
+        // компьютер будет действовать на опережение, попытается "подпортить"
+        // человеку выигрышную комбинацию
+        for (int y = 0; y < fieldSizeY; y++) {
+            for (int x = 0; x < fieldSizeX; x++) {
+                if (field[x][y] == DOT_EMPTY) {
+                    field[x][y] = DOT_HUMAN;
+                    if (checkWin(DOT_HUMAN, WIN_COUNT -(f ? 0 : 1))) {
+                        field[x][y] = DOT_AI;
+                        return;
+                    } else {
+                        field[x][y] = DOT_EMPTY;
+                    }
+                }
+            }
+        }
+
+        // Ни человек, ни компьютер не выигрывают, значит, компьютер
+        // ставит фишку случайным образом
+        int x, y;
         do {
-            movePlayer[0] = random.nextInt(fieldSizeX);
-            movePlayer[1] = random.nextInt(fieldSizeY);
-        } while (!isCellEmpty());
-        field[movePlayer[0]][movePlayer[1]] = DOT_AI;
+            x = random.nextInt(fieldSizeX);
+            y = random.nextInt(fieldSizeY);
+        } while (!isCellEmpty(x, y));
+        field[x][y] = DOT_AI;
     }
 
-    private static int countSellRightHorizontal(char c, int x, int y) {
-        int count = 0;
-        while (x < fieldSizeX) {
-            if (field[x][y] == c) {
-                count++;
-                x++;
-            } else break;
+    /**
+     * Проверка победы игрока
+     * @param dot фишка игрока (человек или компьютер)
+     * @param winCount количество фишек побуды
+     * @return результат проверки
+     */
+    private static boolean checkWin(char dot, int winCount) {
+        for (int y = 0; y < fieldSizeY; y++) {
+            for (int x = 0; x < fieldSizeX; x++) {
+                if (field[x][y] == dot) {
+                    if (checkXY(x, y, 1, winCount) ||
+                    checkXY(x, y, -1, winCount) ||
+                    checkDiagonal(x, y, -1, winCount) ||
+                    checkDiagonal(x, y, 1, winCount)) {
+                        return true;
+                    }
+                }
+            }
         }
-        return count;
+        return false;
     }
 
-    private static int countSellLeftHorizontal(char c, int x, int y) {
-        int count = 0;
-        while (x >= 0) {
-            if (field[x][y] == c) {
-                count++;
-                x--;
-            } else break;
-        }
-        return count;
-    }
-
-    private static int countSellBottomVertical(char c, int x, int y) {
-        int count = 0;
-        while (y < fieldSizeY) {
-            if (field[x][y] == c) {
-                count++;
-                y++;
-            } else break;
-        }
-        return count;
-    }
-
-    private static int countSellTopVertical(char c, int x, int y) {
-        int count = 0;
-        while (y >= 0) {
-            if (field[x][y] == c) {
-                count++;
-                y--;
-            } else break;
-        }
-        return count;
-    }
-
-    private static int countSellBottomLeftDiagonal(char c, int x, int y) {
-        int count = 0;
-        while (x < fieldSizeX && y < fieldSizeY) {
-            if (field[x][y] == c) {
-                count++;
-                x++;
-                y++;
-            } else break;
-        }
-        return count;
-    }
-    private static int countSellTopLeftDiagonal(char c, int x, int y) {
-        int count = 0;
-        while (x >= 0 && y >= 0) {
-            if (field[x][y] == c) {
-                count++;
-                x--;
-                y--;
-            } else break;
-        }
-        return count;
-    }
-
-    private static int countSellBottomRightDiagonal(char c, int x, int y) {
-        int count = 0;
-        while (x >= 0 && y < fieldSizeY) {
-            if (field[x][y] == c) {
-                count++;
-                x--;
-                y++;
-            } else break;
-        }
-        return count;
-    }
-
-    private static int countSellTopRightDiagonal(char c, int x, int y) {
-        int count = 0;
-        while (x < fieldSizeX && y >= 0) {
-            if (field[x][y] == c) {
-                count++;
-                x++;
-                y--;
-            } else break;
-        }
-        return count;
-    }
-
-    private static boolean checkWin(char c) {
-        if (checkVertical(c)) return true;
-        if (checkHorizontal(c)) return true;
-        if (checkLeftDiagonal(c)) return true;
-        return checkRightDiagonal(c);
-    }
-
-    private static boolean checkHorizontal(char c) {
-        int count = 1;
-        count += countSellRightHorizontal(c, movePlayer[0] + 1, movePlayer[1])
-                + countSellLeftHorizontal(c, movePlayer[0] - 1, movePlayer[1]);
-//        System.out.println("countHorizontal: " + count);
-        return count >= WIN_COUNT;
-    }
-
-    private static boolean checkVertical(char c) {
-        int count = 1;
-        count += countSellBottomVertical(c, movePlayer[0], movePlayer[1] + 1)
-                + countSellTopVertical(c, movePlayer[0], movePlayer[1] - 1);
-//        System.out.println("countVertical: " + count);
-        return count >= WIN_COUNT;
-    }
-
-    private static boolean checkLeftDiagonal(char c) {
-        int count = 1;
-        count += countSellBottomLeftDiagonal(c, movePlayer[0] + 1, movePlayer[1] + 1)
-                + countSellTopLeftDiagonal(c, movePlayer[0] - 1, movePlayer[1] - 1);
-        return count >= WIN_COUNT;
-    }
-
-    private static boolean checkRightDiagonal(char c) {
-        int count = 1;
-        count += countSellBottomRightDiagonal(c, movePlayer[0] - 1, movePlayer[1] + 1)
-                + countSellTopRightDiagonal(c, movePlayer[0] + 1, movePlayer[1] - 1);
-        return count >= WIN_COUNT;
-    }
-
+    /**
+     * Проверка на ничью
+     * @return результат проверки
+     */
     private static boolean checkDraw() {
         for (int i = 0; i < fieldSizeX; i++) {
             for (int j = 0; j < fieldSizeY; j++) {
@@ -244,8 +189,50 @@ public class MainApp {
         return true;
     }
 
-    private static boolean gameCheck(char c, String str) {
-        if (checkWin(c)) {
+    /**
+     * Проверка выигрыша игрока (человек или компьютер)
+     * горизонтали + вправо/вертикали + вниз
+     * @param x начальная координата фишки
+     * @param y начальная координата фишки
+     * @param dir направление проверки (-1 => горизонтали + вправо/ 1 => вертикали + вниз)
+     * @param win выигрышная комбинация
+     * @return результат проверки
+     */
+    private static boolean checkXY(int x, int y, int dir, int win) {
+        char c = field[x][y]; // получим текущую фишку (игрок или компьютор)
+        // Пройдем по всем ячейкам от начальной координаты
+        // по горизонтали вправо и по вертикали вниз (в зависимости от значения dir)
+        for (int i = 1; i < win; i++) {
+            if (dir > 0 && (!isCellValid(x + i, y) || c != field[x + i][y])) {
+                return false;
+            } else if (dir < 0 && (!isCellValid(x, y + i) || c != field[x][y + i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkDiagonal(int x, int y, int dir, int win) {
+        char c = field[x][y]; // получить текущую фишку (игрок или компьютер)
+        // Пройдем по всем ячейкам от начальной координаты
+        // по диагонали вверх и по диагонали вниз (в зависимости от значения dir)
+        for (int i = 1; i < win; i++) {
+            if (!isCellValid(x + i, y + i * dir) || c != field[x + i][y + i * dir]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Метод проверки состояния игры
+     * @param dot фишка игрока (человек/компьютер)
+     * @param win выигрышная комбинация
+     * @param str победное сообщение
+     * @return результат проверки
+     */
+    private static boolean gameCheck(char dot, int win, String str) {
+        if (checkWin(dot, win)) {
             System.out.println(str);
             return true;
         }
