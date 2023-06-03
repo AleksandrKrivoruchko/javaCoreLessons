@@ -16,6 +16,8 @@ public class MainApp {
 
     // Ход игрока movePlayer[0] = x, movePlayer[1] = y
     private static int[] movePlayer = new int[2];
+
+
     public static void main(String[] args) {
         do {
             initialize();
@@ -52,20 +54,20 @@ public class MainApp {
      */
     private static void printField() {
         System.out.print("+");
-        for (int i = 0; i < fieldSizeY * 2 + 1; i++) {
+        for (int i = 0; i < fieldSizeX * 2 + 1; i++) {
             System.out.print((i % 2 == 0) ? "-" : i / 2 + 1);
         }
         System.out.println();
 
-        for (int i = 0; i < fieldSizeX; i++) {
+        for (int i = 0; i < fieldSizeY; i++) {
             System.out.print(i + 1 + "|");
-            for (int j = 0; j < fieldSizeY; j++) {
-                System.out.print(field[i][j] + "|");
+            for (int j = 0; j < fieldSizeX; j++) {
+                System.out.print(field[j][i] + "|");
             }
             System.out.println();
         }
 
-        for (int i = 0; i < fieldSizeY * 2 + 2; i++) {
+        for (int i = 0; i < fieldSizeX * 2 + 2; i++) {
             System.out.print("-");
         }
         System.out.println();
@@ -105,119 +107,132 @@ public class MainApp {
         field[movePlayer[0]][movePlayer[1]] = DOT_AI;
     }
 
-    private static boolean checkWin(char c, int winCount) {
-        if (checkVertical(c, winCount)) return true;
-        if (checkHorizontal(c, winCount)) return true;
-        if (checkLeftDiagonal(c, winCount)) return true;
-        if (checkRightDiagonal(c, winCount)) return true;
-
-        return false;
+    private static int countSellRightHorizontal(char c, int x, int y) {
+        int count = 0;
+        while (x < fieldSizeX) {
+            if (field[x][y] == c) {
+                count++;
+                x++;
+            } else break;
+        }
+        return count;
     }
 
-    private static boolean checkVertical(char c, int winCount) {
-        int count = 1;
-        for (int i = movePlayer[0] + 1; i < fieldSizeX; i++) {
-            if (field[i][movePlayer[1]] == c) {
+    private static int countSellLeftHorizontal(char c, int x, int y) {
+        int count = 0;
+        while (x >= 0) {
+            if (field[x][y] == c) {
                 count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
+                x--;
+            } else break;
         }
-        for (int i = movePlayer[0] - 1; i >=0; i--) {
-            if (field[i][movePlayer[1]] == c) {
-                count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
-        }
-        return false;
+        return count;
     }
 
-    private static boolean checkHorizontal(char c, int winCount) {
-        int count = 1;
-        for (int i = movePlayer[1] + 1; i < fieldSizeY; i++) {
-            if (field[movePlayer[0]][i] == c) {
+    private static int countSellBottomVertical(char c, int x, int y) {
+        int count = 0;
+        while (y < fieldSizeY) {
+            if (field[x][y] == c) {
                 count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
+                y++;
+            } else break;
         }
-        for (int i = movePlayer[1] - 1; i >=0; i--) {
-            if (field[movePlayer[0]][i] == c) {
-                count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
-        }
-        return false;
+        return count;
     }
 
-    private static boolean checkLeftDiagonal(char c, int winCount) {
-        int count = 1;
-        for (int i = movePlayer[0] -1, j = movePlayer[1] - 1;
-             i >= 0 && j >= 0; i--, j--) {
-            if (field[i][j] == c) {
+    private static int countSellTopVertical(char c, int x, int y) {
+        int count = 0;
+        while (y >= 0) {
+            if (field[x][y] == c) {
                 count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
+                y--;
+            } else break;
         }
-
-        for (int i = movePlayer[0] + 1, j = movePlayer[1] + 1;
-             i < fieldSizeX && j < fieldSizeY; i++, j++) {
-            if (field[i][j] == c) {
-                count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
-        }
-        return false;
+        return count;
     }
 
-    private static boolean checkRightDiagonal(char c, int winCount) {
-        int count = 1;
-        for (int i = movePlayer[0] -1, j = movePlayer[1] + 1;
-             i >= 0 && j < fieldSizeY; i--, j++) {
-            if (field[i][j] == c) {
+    private static int countSellBottomLeftDiagonal(char c, int x, int y) {
+        int count = 0;
+        while (x < fieldSizeX && y < fieldSizeY) {
+            if (field[x][y] == c) {
                 count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
+                x++;
+                y++;
+            } else break;
         }
+        return count;
+    }
+    private static int countSellTopLeftDiagonal(char c, int x, int y) {
+        int count = 0;
+        while (x >= 0 && y >= 0) {
+            if (field[x][y] == c) {
+                count++;
+                x--;
+                y--;
+            } else break;
+        }
+        return count;
+    }
 
-        for (int i = movePlayer[0] + 1, j = movePlayer[1] - 1;
-             i < fieldSizeX && j >= 0; i++, j--) {
-            if (field[i][j] == c) {
+    private static int countSellBottomRightDiagonal(char c, int x, int y) {
+        int count = 0;
+        while (x >= 0 && y < fieldSizeY) {
+            if (field[x][y] == c) {
                 count++;
-                if (count == winCount) {
-                    return true;
-                }
-            } else {
-                break;
-            }
+                x--;
+                y++;
+            } else break;
         }
-        return false;
+        return count;
+    }
+
+    private static int countSellTopRightDiagonal(char c, int x, int y) {
+        int count = 0;
+        while (x < fieldSizeX && y >= 0) {
+            if (field[x][y] == c) {
+                count++;
+                x++;
+                y--;
+            } else break;
+        }
+        return count;
+    }
+
+    private static boolean checkWin(char c) {
+        if (checkVertical(c)) return true;
+        if (checkHorizontal(c)) return true;
+        if (checkLeftDiagonal(c)) return true;
+        return checkRightDiagonal(c);
+    }
+
+    private static boolean checkHorizontal(char c) {
+        int count = 1;
+        count += countSellRightHorizontal(c, movePlayer[0] + 1, movePlayer[1])
+                + countSellLeftHorizontal(c, movePlayer[0] - 1, movePlayer[1]);
+//        System.out.println("countHorizontal: " + count);
+        return count >= WIN_COUNT;
+    }
+
+    private static boolean checkVertical(char c) {
+        int count = 1;
+        count += countSellBottomVertical(c, movePlayer[0], movePlayer[1] + 1)
+                + countSellTopVertical(c, movePlayer[0], movePlayer[1] - 1);
+//        System.out.println("countVertical: " + count);
+        return count >= WIN_COUNT;
+    }
+
+    private static boolean checkLeftDiagonal(char c) {
+        int count = 1;
+        count += countSellBottomLeftDiagonal(c, movePlayer[0] + 1, movePlayer[1] + 1)
+                + countSellTopLeftDiagonal(c, movePlayer[0] - 1, movePlayer[1] - 1);
+        return count >= WIN_COUNT;
+    }
+
+    private static boolean checkRightDiagonal(char c) {
+        int count = 1;
+        count += countSellBottomRightDiagonal(c, movePlayer[0] - 1, movePlayer[1] + 1)
+                + countSellTopRightDiagonal(c, movePlayer[0] + 1, movePlayer[1] - 1);
+        return count >= WIN_COUNT;
     }
 
     private static boolean checkDraw() {
@@ -230,7 +245,7 @@ public class MainApp {
     }
 
     private static boolean gameCheck(char c, String str) {
-        if (checkWin(c, WIN_COUNT)) {
+        if (checkWin(c)) {
             System.out.println(str);
             return true;
         }
