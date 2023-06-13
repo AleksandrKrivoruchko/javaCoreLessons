@@ -4,29 +4,35 @@ import java.util.Arrays;
 
 public class MainApp {
     public static void main(String[] args) {
-        WorkWithArray workWithArray = new WorkWithArray(4, 4, false);
         WorkWithArray workWithArray1 = new WorkWithArray(5, 6, false);
         WorkWithArray workWithArray2 = new WorkWithArray(4, 4, true);
+
         try {
-            System.out.println(workWithArray);
-            System.out.println(workWithArray.sumOfArrayElements());
-
-            System.out.println("********************************************");
-            workWithArray1.sumOfArrayElements();
-
-        } catch (MyArraySizeException ex) {
+            workWithArray1.sumOfArrayElements(true);
+        } catch (MyArrayException ex) {
             System.out.println(ex.formatMessage());
             System.out.println(workWithArray1);
-        } catch (MyArrayDataException ex) {
-            System.out.println(ex.formatMessage());
         }
+
         try {
+            System.out.println("Сумма элементов массива равна " +
+                    workWithArray1.sumOfArrayElements(false));
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++");
-            System.out.println(workWithArray2.sumOfArrayElements());
+            System.out.println(workWithArray2.sumOfArrayElements(true));
         } catch (MyArrayException ex) {
             System.out.println(ex.formatMessage());
             System.out.println(workWithArray2);
+            workWithArray2.setElement("0", ex.row, ex.column);
         }
 
+        System.out.println("\n---------------------------------------------");
+        System.out.println("Исправленный массив:\n");
+        System.out.println(workWithArray2);
+        try {
+            System.out.println("Сумма элементов массива равна " +
+                    workWithArray2.sumOfArrayElements(true));
+        } catch (MyArrayException ex) {
+            ex.printStackTrace();
+        }
     }
 }
