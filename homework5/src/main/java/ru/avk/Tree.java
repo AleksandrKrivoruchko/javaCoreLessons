@@ -3,6 +3,12 @@ package ru.avk;
 import java.io.File;
 
 public class Tree {
+    /**
+     * Метод для вывода в консоль дерева директории
+     * @param file объект File созданный для директории
+     * @param indent строка со смещением и разделительными знаками
+     * @param isLast признак, если файл последний то true, иначе false
+     */
     public static void print(File file, String indent, boolean isLast) {
         System.out.print(indent);
         if (isLast) {
