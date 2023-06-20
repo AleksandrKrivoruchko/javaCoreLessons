@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Класс  для 1 задания
+ */
 public class Backup {
 
     /**

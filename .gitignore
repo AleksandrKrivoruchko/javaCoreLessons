@@ -4,6 +4,7 @@
 */.idea/
 */.gitignore
 */backup
+*/*.txt
 
 
 # Log file

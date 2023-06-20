@@ -2,6 +2,9 @@ package ru.avk;
 
 import java.io.File;
 
+/**
+ * Класс для 2 задания
+ */
 public class Tree {
     /**
      * Метод для вывода в консоль дерева директории
